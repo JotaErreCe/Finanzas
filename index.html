@@ -471,7 +471,7 @@ function renderRubros(rubros) {
             <div class="rubro-montos">
               Q ${r.gast.toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}
               <span style="color:var(--text2)"> / Q ${r.pres.toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}</span>
-              ${excedido ? `<span style="color:var(--red)"> +Q${(r.gast-r.pres).toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}</span>` : ""}
+              <span style="color:var(--green);font-weight:500"> · Q ${r.disp.toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}</span>
             </div>
             <div class="rubro-badge" style="background:${badge.bg};color:${badge.color}">${badge.txt}</div>
           </div>
