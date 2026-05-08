@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Finanzas">
+<title>Finanzas Familiares</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg0: #0d0d1f;
+  --bg1: #13132b;
+  --bg2: #1a1a38;
+  --bg3: #222244;
+  --text0: #f0f0ff;
+  --text1: #a0a0cc;
+  --text2: #5a5a88;
+  --green: #5DCAA5;
+  --green-dim: #1a3a2e;
+  --amber: #EF9F27;
+  --amber-dim: #3a2a0a;
+  --red: #E24B4A;
+  --red-dim: #3a0a0a;
+  --blue: #5b9cf6;
+  --purple: #a78bfa;
+  --radius: 14px;
+  --radius-sm: 9px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { background: var(--bg0); }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg0);
+  color: var(--text0);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+
+/* ── TOP BAR ── */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem .5rem;
+}
+.topbar-title { font-size: 13px; font-weight: 500; color: var(--text1); letter-spacing: .04em; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+.refresh-btn {
+  background: var(--bg2);
+  border: none;
+  color: var(--text1);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: background .15s;
+}
+.refresh-btn:active { background: var(--bg3); }
+.last-update { font-size: 11px; color: var(--text2); }
+
+/* ── HERO CARD ── */
+.hero {
+  margin: .5rem 1.25rem 0;
+  background: var(--bg1);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  border: .5px solid rgba(255,255,255,.06);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(93,202,165,.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-period { font-size: 12px; color: var(--text2); margin-bottom: .35rem; }
+.hero-avail { font-size: 36px; font-weight: 600; color: var(--green); letter-spacing: -.02em; }
+.hero-avail-label { font-size: 12px; color: var(--text1); margin-top: 2px; margin-bottom: 1rem; }
+.hero-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.hstat {
+  background: var(--bg2);
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
+}
+.hstat-label { font-size: 10px; color: var(--text2); letter-spacing: .04em; margin-bottom: 3px; }
+.hstat-val { font-size: 16px; font-weight: 500; }
+
+/* ── PROGRESS RING ── */
+.hero-ring {
+  position: absolute;
+  top: 1.25rem; right: 1.25rem;
+}
+.ring-svg { transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: var(--bg3); stroke-width: 4; }
+.ring-fill  { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
+.ring-label {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 13px; font-weight: 600;
+  font-family: 'DM Mono', monospace;
+}
+
+/* ── FILTERS ── */
+.filters {
+  display: flex; gap: 6px;
+  padding: .75rem 1.25rem .5rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.filters::-webkit-scrollbar { display: none; }
+.filter-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  padding: 5px 13px;
+  border-radius: 20px;
+  border: .5px solid rgba(255,255,255,.1);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all .15s;
+  background: var(--bg2);
+  color: var(--text1);
+}
+.filter-btn.active { background: var(--green); color: #04342C; border-color: transparent; }
+.filter-btn:active { opacity: .75; }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-size: 11px; color: var(--text2);
+  letter-spacing: .06em;
+  padding: .5rem 1.25rem .25rem;
+}
+
+/* ── RUBRO CARDS ── */
+.rubros { padding: 0 1.25rem; display: flex; flex-direction: column; gap: 7px; padding-bottom: 2rem; }
+.rubro-card {
+  background: var(--bg1);
+  border-radius: var(--radius-sm);
+  padding: 12px 13px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: .5px solid rgba(255,255,255,.05);
+  transition: transform .1s;
+  cursor: default;
+}
+.rubro-card:active { transform: scale(.98); }
+.icon-chip {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.rubro-body { flex: 1; min-width: 0; }
+.rubro-row1 {
+  display: flex; justify-content: space-between;
+  align-items: baseline; margin-bottom: 5px;
+}
+.rubro-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 190px; }
+.rubro-pct { font-size: 12px; font-weight: 600; font-family: 'DM Mono', monospace; flex-shrink: 0; }
+.bar-bg { background: var(--bg3); height: 4px; border-radius: 2px; overflow: hidden; margin-bottom: 4px; }
+.bar-fill { height: 100%; border-radius: 2px; transition: width .5s ease; }
+.rubro-row2 { display: flex; justify-content: space-between; align-items: center; }
+.rubro-montos { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+.rubro-badge {
+  font-size: 10px; font-weight: 500;
+  padding: 2px 7px; border-radius: 10px;
+}
+
+/* ── ATIPICOS SECTION ── */
+.atip-section { padding: 0 1.25rem .5rem; }
+.atip-card {
+  background: rgba(186,117,23,.1);
+  border: .5px solid rgba(186,117,23,.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex; align-items: flex-start; gap: 9px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+.atip-card i { color: var(--amber); margin-top: 1px; flex-shrink: 0; }
+.atip-name { font-weight: 500; color: var(--text0); }
+.atip-detail { color: var(--text2); margin-top: 1px; }
+
+/* ── LOADING / ERROR ── */
+.state-screen {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  min-height: 60vh; gap: 12px;
+  color: var(--text2);
+}
+.spinner {
+  width: 32px; height: 32px;
+  border: 2.5px solid var(--bg3);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center;
+  font-size: 11px; color: var(--text2);
+  padding: .5rem 1.25rem 1.5rem;
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="state-screen" id="loading">
+    <div class="spinner"></div>
+    <div>Cargando datos...</div>
+  </div>
+</div>
+
+<script>
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vReOObq8sX1yKsoHkoylIMjVIzYnSxOhz_zutQ89BN5FJeKrQpibll0XxioaupzTxlPFmL8uLY53EUI/pub?gid=650445178&single=true&output=csv";
+
+const ICONOS = {
+  "Vivienda":               {icon:"ti-home",           bg:"#1a2240",ic:"#5b9cf6"},
+  "Servicios del hogar":    {icon:"ti-bolt",           bg:"#1a2240",ic:"#5b9cf6"},
+  "Luz CC":                 {icon:"ti-bulb",           bg:"#1a3020",ic:"#5DCAA5"},
+  "Luz Zona 14":            {icon:"ti-bulb",           bg:"#1a3020",ic:"#5DCAA5"},
+  "Telefonía":              {icon:"ti-device-mobile",  bg:"#22183a",ic:"#a78bfa"},
+  "Suscripciones digitales":{icon:"ti-cloud",          bg:"#22183a",ic:"#a78bfa"},
+  "Cuotas TC":              {icon:"ti-credit-card",    bg:"#2a1830",ic:"#f472b6"},
+  "Comida y supermercado":  {icon:"ti-shopping-cart",  bg:"#2a2010",ic:"#EF9F27"},
+  "Gasolina y transporte":  {icon:"ti-gas-station",    bg:"#2a1010",ic:"#E24B4A"},
+  "Salud Nicolás":          {icon:"ti-heart",          bg:"#2a1010",ic:"#f87171"},
+  "Nikolai (mascota)":      {icon:"ti-paw",            bg:"#1a2a10",ic:"#86efac"},
+  "Mesadas":                {icon:"ti-wallet",         bg:"#1a2a10",ic:"#5DCAA5"},
+  "Mesada bebé":            {icon:"ti-baby-carriage",  bg:"#22183a",ic:"#c4b5fd"},
+  "Gastos imprevistos casa":{icon:"ti-tools",          bg:"#2a2010",ic:"#fbbf24"},
+  "Recreación":             {icon:"ti-confetti",       bg:"#1a2240",ic:"#60a5fa"},
+  "Impuestos":              {icon:"ti-receipt-tax",    bg:"#2a1830",ic:"#e879f9"},
+  "Otros":                  {icon:"ti-dots-circle-horizontal",bg:"#1e1e38",ic:"#6666aa"},
+};
+
+const DEFAULT_ICON = {icon:"ti-circle",bg:"#1e1e38",ic:"#6666aa"};
+
+let filtro = "todos";
+let datosGlobales = null;
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n").map(l => l.split(",").map(c => c.replace(/^"|"$/g,"").trim()));
+  return lines;
+}
+
+function getColor(pct) {
+  if (pct >= 1)   return "#E24B4A";
+  if (pct >= 0.8) return "#EF9F27";
+  return "#5DCAA5";
+}
+
+function getBadge(pct) {
+  if (pct >= 1)   return {txt:"Excedido",   bg:"rgba(226,75,74,.15)",  color:"#E24B4A"};
+  if (pct >= 0.8) return {txt:"Cerca",      bg:"rgba(239,159,39,.15)", color:"#EF9F27"};
+  return              {txt:"En rango",  bg:"rgba(93,202,165,.12)", color:"#5DCAA5"};
+}
+
+async function cargarDatos() {
+  try {
+    const res = await fetch(CSV_URL + "&_=" + Date.now());
+    const text = await res.text();
+    const rows = parseCSV(text);
+
+    // El dashboard mensual tiene:
+    // Row 0: headers de resumen (fila 4 del sheet = row index ~3-5 del CSV)
+    // Buscamos filas con datos de rubros
+
+    let presupuestoTotal = 0, gastadoTotal = 0, diasMes = 30, diaMes = 7;
+    let periodo = "10 abril — 9 mayo";
+    let rubros = [];
+    let atipicos = [];
+
+    // Parsear encabezados y datos del CSV
+    // El CSV del Dashboard Mensual tiene estructura específica
+    // Buscamos filas que tengan nombre de rubro en col B (índice 1)
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      if (!row || row.length < 6) continue;
+
+      // Detectar fila de resumen (busca "Presupuesto total" o similar)
+      if (row[0] && row[0].toString().includes("Presupuesto")) {
+        const val = parseFloat((row[1]||"").replace(/[Q,\s]/g,""));
+        if (!isNaN(val) && val > 1000) presupuestoTotal = val;
+      }
+      if (row[0] && row[0].toString().includes("Gastado")) {
+        const val = parseFloat((row[1]||"").replace(/[Q,\s]/g,""));
+        if (!isNaN(val)) gastadoTotal = val;
+      }
+      if (row[0] && row[0].toString().toLowerCase().includes("días restantes")) {
+        const val = parseInt(row[1]);
+        if (!isNaN(val)) diasMes = val + diaMes;
+      }
+
+      // Detectar filas de rubros: col A = número, col B = nombre, col C = presupuesto, col D = gastado
+      const numCol = parseInt(row[0]);
+      const nombreCol = (row[1]||"").trim();
+      if (numCol >= 1 && numCol <= 17 && nombreCol.length > 2) {
+        const pres = parseFloat((row[2]||"").replace(/[Q$,\s]/g,"")) || 0;
+        const gast = parseFloat((row[3]||"").replace(/[Q$,\s]/g,"")) || 0;
+        const disp = parseFloat((row[4]||"").replace(/[Q$,\s]/g,"")) || 0;
+        const pct  = parseFloat((row[5]||"").replace(/[%\s]/g,"")) / 100 || 0;
+        const txCount = parseInt(row[7]) || 0;
+        rubros.push({ nombre: nombreCol, pres, gast, disp, pct, txCount });
+      }
+    }
+
+    // Si no se pudieron parsear rubros del CSV (estructura diferente),
+    // mostrar mensaje de ayuda
+    if (rubros.length === 0) {
+      mostrarError("No se pudieron leer los rubros del Sheet. Verifica que la hoja 'Dashboard Mensual' esté publicada correctamente.");
+      return;
+    }
+
+    if (presupuestoTotal === 0) presupuestoTotal = rubros.reduce((s,r)=>s+r.pres,0);
+    if (gastadoTotal === 0)     gastadoTotal     = rubros.reduce((s,r)=>s+r.gast,0);
+
+    datosGlobales = { presupuestoTotal, gastadoTotal, periodo, diaMes, diasMes, rubros, atipicos };
+    renderDashboard(datosGlobales);
+
+  } catch(e) {
+    mostrarError("No se pudo cargar el Sheet. Verifica tu conexión a internet.");
+    console.error(e);
+  }
+}
+
+function mostrarError(msg) {
+  document.getElementById("app").innerHTML = `
+    <div class="state-screen">
+      <i class="ti ti-wifi-off" style="font-size:32px;color:var(--text2)"></i>
+      <div style="text-align:center;max-width:260px;line-height:1.5">${msg}</div>
+      <button onclick="recargar()" style="margin-top:8px;background:var(--bg2);border:.5px solid rgba(255,255,255,.1);color:var(--text1);padding:8px 20px;border-radius:20px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:13px">Reintentar</button>
+    </div>`;
+}
+
+function recargar() {
+  document.getElementById("app").innerHTML = `<div class="state-screen" id="loading"><div class="spinner"></div><div>Cargando datos...</div></div>`;
+  cargarDatos();
+}
+
+function renderDashboard(d) {
+  const pctGlobal = d.presupuestoTotal > 0 ? d.gastadoTotal / d.presupuestoTotal : 0;
+  const disponible = d.presupuestoTotal - d.gastadoTotal;
+  const colorGlobal = getColor(pctGlobal);
+  const pctDisplay = Math.round(pctGlobal * 100);
+
+  // Ring circle
+  const r = 28, circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.min(pctGlobal, 1));
+
+  const rubrosAlerta = d.rubros.filter(r => r.pct >= 0.8);
+  const rubrosOk     = d.rubros.filter(r => r.pct < 0.8);
+
+  const now = new Date();
+  const hora = now.toLocaleTimeString("es-GT", {hour:"2-digit", minute:"2-digit"});
+
+  document.getElementById("app").innerHTML = `
+    <div class="topbar">
+      <div class="topbar-title">FINANZAS FAMILIARES</div>
+      <div class="topbar-right">
+        <div class="last-update">${hora}</div>
+        <button class="refresh-btn" onclick="recargar()" aria-label="Actualizar">
+          <i class="ti ti-refresh"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="hero">
+      <div class="hero-ring">
+        <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72" aria-hidden="true">
+          <circle class="ring-track" cx="36" cy="36" r="${r}"/>
+          <circle class="ring-fill" cx="36" cy="36" r="${r}"
+            stroke="${colorGlobal}"
+            stroke-dasharray="${circ}"
+            stroke-dashoffset="${offset}"
+          />
+        </svg>
+        <div class="ring-label" style="color:${colorGlobal}">${pctDisplay}%</div>
+      </div>
+
+      <div class="hero-period">${d.periodo}</div>
+      <div class="hero-avail">Q ${disponible.toLocaleString("es-GT", {minimumFractionDigits:2, maximumFractionDigits:2})}</div>
+      <div class="hero-avail-label">disponible este período</div>
+
+      <div class="hero-stats">
+        <div class="hstat">
+          <div class="hstat-label">PRESUPUESTO</div>
+          <div class="hstat-val">Q ${Math.round(d.presupuestoTotal/1000)}k</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">GASTADO</div>
+          <div class="hstat-val" style="color:${colorGlobal}">Q ${Math.round(d.gastadoTotal/1000)}k</div>
+        </div>
+        <div class="hstat">
+          <div class="hstat-label">ALERTAS</div>
+          <div class="hstat-val" style="color:${rubrosAlerta.length > 0 ? '#E24B4A' : '#5DCAA5'}">${rubrosAlerta.length}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn ${filtro==='todos'?'active':''}" onclick="setFiltro('todos')">Todos</button>
+      <button class="filter-btn ${filtro==='alerta'?'active':''}" onclick="setFiltro('alerta')">⚠ Con alerta (${rubrosAlerta.length})</button>
+      <button class="filter-btn ${filtro==='bien'?'active':''}" onclick="setFiltro('bien')">✓ En rango (${rubrosOk.length})</button>
+    </div>
+
+    ${renderRubros(d.rubros)}
+
+    <div class="footer">Actualizado a las ${hora} · Toca ↻ para refrescar</div>
+  `;
+}
+
+function renderRubros(rubros) {
+  const lista = filtro === "alerta" ? rubros.filter(r=>r.pct>=0.8) :
+                filtro === "bien"   ? rubros.filter(r=>r.pct<0.8)  : rubros;
+
+  if (lista.length === 0) {
+    return `<div class="rubros"><div style="text-align:center;color:var(--text2);padding:2rem;font-size:13px">Sin rubros en esta categoría</div></div>`;
+  }
+
+  const cards = lista.map(r => {
+    const ic = ICONOS[r.nombre] || DEFAULT_ICON;
+    const color = getColor(r.pct);
+    const badge = getBadge(r.pct);
+    const barW = Math.min(r.pct * 100, 100).toFixed(1);
+    const pctDisplay = r.pres > 0 ? Math.round(r.pct*100)+"%" : "—";
+    const excedido = r.gast > r.pres && r.pres > 0;
+
+    return `
+      <div class="rubro-card">
+        <div class="icon-chip" style="background:${ic.bg}">
+          <i class="ti ${ic.icon}" style="color:${ic.ic}" aria-hidden="true"></i>
+        </div>
+        <div class="rubro-body">
+          <div class="rubro-row1">
+            <div class="rubro-name">${r.nombre}</div>
+            <div class="rubro-pct" style="color:${color}">${pctDisplay}</div>
+          </div>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:${barW}%;background:${color}"></div>
+          </div>
+          <div class="rubro-row2">
+            <div class="rubro-montos">
+              Q ${r.gast.toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}
+              <span style="color:var(--text2)"> / Q ${r.pres.toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}</span>
+              ${excedido ? `<span style="color:var(--red)"> +Q${(r.gast-r.pres).toLocaleString("es-GT",{minimumFractionDigits:0,maximumFractionDigits:0})}</span>` : ""}
+            </div>
+            <div class="rubro-badge" style="background:${badge.bg};color:${badge.color}">${badge.txt}</div>
+          </div>
+        </div>
+      </div>`;
+  }).join("");
+
+  return `<div class="section-label">${lista.length} RUBROS</div><div class="rubros">${cards}</div>`;
+}
+
+function setFiltro(f) {
+  filtro = f;
+  if (datosGlobales) renderDashboard(datosGlobales);
+}
+
+cargarDatos();
+</script>
+</body>
+</html>
