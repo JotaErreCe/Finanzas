@@ -345,8 +345,9 @@ async function cargarDatos() {
       return;
     }
 
-    if (presupuestoTotal === 0) presupuestoTotal = rubros.reduce((s,r)=>s+r.pres,0);
-    if (gastadoTotal === 0)     gastadoTotal     = rubros.reduce((s,r)=>s+r.gast,0);
+    // Siempre calcular totales desde los rubros directamente
+    presupuestoTotal = rubros.reduce((s,r)=>s+r.pres, 0);
+    gastadoTotal     = rubros.reduce((s,r)=>s+r.gast, 0);
 
     datosGlobales = { presupuestoTotal, gastadoTotal, periodo, diaMes, diasMes, rubros, atipicos };
     renderDashboard(datosGlobales);
