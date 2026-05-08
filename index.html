@@ -320,13 +320,15 @@ async function cargarDatos() {
         if (!isNaN(val)) diasMes = val + diaMes;
       }
 
-      // Detectar filas de rubros: col A = número, col B = nombre, col C = presupuesto, col D = gastado
+      // Detectar filas de rubros: col A = número, col B = nombre, col C = presupuesto, col D = gastado, col E = disponible, col F = % usado
       const numCol = parseInt(row[0]);
       const nombreCol = (row[1]||"").trim();
       if (numCol >= 1 && numCol <= 17 && nombreCol.length > 2) {
-        const pres = parseFloat((row[2]||"").replace(/[Q$,\s]/g,"")) || 0;
-        const gast = parseFloat((row[3]||"").replace(/[Q$,\s]/g,"")) || 0;
-        const disp = parseFloat((row[4]||"").replace(/[Q$,\s]/g,"")) || 0;
+        // Normalizar números: reemplazar punto de miles con nada, coma decimal con punto
+        const cleanNum = (s) => parseFloat((s||"").replace(/[Q$\s]/g,"").replace(/\./g,"").replace(",",".")) || 0;
+        const pres = cleanNum(row[2]);
+        const gast = cleanNum(row[3]);
+        const disp = cleanNum(row[4]);
         const pct  = parseFloat((row[5]||"").replace(/[%\s]/g,"")) / 100 || 0;
         const txCount = parseInt(row[7]) || 0;
         rubros.push({ nombre: nombreCol, pres, gast, disp, pct, txCount });
