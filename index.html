@@ -517,6 +517,23 @@ async function csvGet() {
   const text = await res.text();
   const rows = text.trim().split("\n").map(parseCSVLine);
   const rubros = [];
+  let periodo = null;
+  for (const row of rows) {
+    // El CSV publica el período real: "Período: 2026-06-10 → 2026-07-09"
+    if (!periodo && row[0]) {
+      const m = row[0].match(/Per[íi]odo:\s*(\d{4})-(\d{2})-(\d{2})\s*(?:→|-|a)\s*(\d{4})-(\d{2})-(\d{2})/);
+      if (m) {
+        const ini = new Date(+m[1], +m[2] - 1, +m[3]);
+        const fin = new Date(+m[4], +m[5] - 1, +m[6]);
+        const f = dt => dt.toLocaleDateString("es-GT", {day: "numeric", month: "short"});
+        periodo = {
+          label: f(ini) + " – " + f(fin),
+          diaActual: Math.min(Math.max(Math.floor((Date.now() - ini) / 86400000) + 1, 1), Math.round((fin - ini) / 86400000) + 1),
+          diasTotales: Math.round((fin - ini) / 86400000) + 1
+        };
+      }
+    }
+  }
   for (const row of rows) {
     if (!row || row.length < 6) continue;
     const num = parseInt(row[0]);
@@ -529,7 +546,7 @@ async function csvGet() {
     }
   }
   if (rubros.length === 0) throw new Error("No se pudieron leer los rubros del CSV publicado.");
-  return { modo: "csv", rubros, periodo: null, tendencia: [], metodos: [], fijos: [], rubrosLista: [] };
+  return { modo: "csv", rubros, periodo, tendencia: [], metodos: [], fijos: [], rubrosLista: [] };
 }
 function parseCSVLine(line) {
   const out = []; let cur = "", q = false;
@@ -592,8 +609,7 @@ async function cargarDatos() {
   try {
     if (MOCK) D = mockData();
     else if (cfg.apiUrl && cfg.token) { D = await apiGet(); D.modo = "api"; }
-    else if (cfg.modo === "csv") D = await csvGet();
-    else { renderSetup(); return; }
+    else D = await csvGet(); // sin configurar: funciona como siempre, leyendo el CSV publicado
     render();
   } catch (e) {
     console.error(e);
@@ -657,7 +673,7 @@ function render() {
   if (esAPI && D.metodos && D.metodos.length) html += renderMetodos(d++);
   if (!esAPI) {
     html += `<div class="hint-card reveal" style="--d:${d++}"><i class="ti ti-plug"></i>
-      <div>Modo solo lectura. Conecta la API desde <b>⚙ Ajustes</b> para ver tendencia, gastos fijos, métodos de pago y registrar gastos.</div></div>`;
+      <div>Modo lectura (CSV). Cuando la API esté desplegada, conéctala en <b>⚙ Ajustes</b> para ver tendencia, gastos fijos, métodos de pago y registrar gastos desde aquí.</div></div>`;
   }
 
   const rubrosAlerta = D.rubros.filter(x => x.pct >= .8);
@@ -844,17 +860,6 @@ function renderRubros(d) {
 }
 
 // ── Pantallas de estado ──
-function renderSetup() {
-  $("#app").innerHTML = `
-    <div class="state-screen">
-      <div class="state-brand">Finanzas</div>
-      <div style="font-size:13.5px;line-height:1.6;max-width:280px">Bienvenido. Conecta la app con tu sistema de Google Sheets para empezar.</div>
-      <button class="btn-primary" style="max-width:280px" id="setupApi">Conectar con la API</button>
-      <button class="btn-ghost" style="max-width:280px" id="setupCsv">Usar modo solo lectura (CSV)</button>
-    </div>`;
-  $("#setupApi").onclick = abrirAjustes;
-  $("#setupCsv").onclick = () => { cfg.modo = "csv"; guardarCfg(); recargarUI(); };
-}
 function renderError(msg) {
   $("#app").innerHTML = `
     <div class="state-screen">
@@ -944,7 +949,7 @@ $("#cfgCompartir").onclick = async () => {
   catch (e) { prompt("Copia este enlace:", link); }
 };
 $("#cfgCsv").onclick = () => {
-  cfg.modo = "csv";
+  cfg = { modo: "csv" }; // desconecta la API y vuelve al CSV publicado
   guardarCfg();
   cerrarSheets();
   recargarUI();

@@ -4,22 +4,18 @@
 
 | Archivo | Estado | Qué hace |
 |---|---|---|
-| `Code.gs` | **Ya está en tu proyecto** (copia de referencia, no hay que pegarlo) | v2: procesa correos de consumo de tarjeta, alertas, resumen semanal |
-| `Transferencias.gs` | **NUEVO — pegar** | Procesa correos de transferencia ACH; separa internas de gastos reales |
-| `MetodosPago.gs` | **NUEVO — pegar** | Hoja "Métodos de Pago": gasto por tarjeta/cuenta, últimos 6 períodos |
-| `ControlMaestro.gs` | **NUEVO — pegar** | Catálogo "Fijos" + checklist mensual "Control Pagos" en el Control Maestro |
-| `API.gs` | **NUEVO — pegar** | Web App: la app de GitHub lee el dashboard y escribe gastos/pagos |
-| `Setup.gs` | **NUEVO — pegar** | `setupV3()`: crea hojas, token y triggers de un solo clic |
+| `Code.gs` | **Ya está en tu proyecto** (copia de referencia, no hay que tocarlo) | v2: procesa correos de consumo de tarjeta, alertas, resumen semanal |
+| `FinanzasV3.gs` | **NUEVO — un solo archivo** | Todo lo v3: transferencias ACH, métodos de pago, fijos del Control Maestro, API web y `setupV3()` |
 
-**El código v2 no se toca.** Todo lo nuevo son archivos independientes que
-conviven en el mismo proyecto (Apps Script comparte funciones entre archivos).
-`procesarCorreos` y sus triggers siguen igual.
+**El código v2 no se toca.** `FinanzasV3.gs` es un único archivo independiente
+que convive en el mismo proyecto (Apps Script comparte funciones entre
+archivos). `procesarCorreos` y sus triggers siguen igual.
 
 ## Instalación (una sola vez, ~5 minutos)
 
 1. Abrir el sheet de seguimiento → **Extensiones → Apps Script**.
-2. Por cada archivo NUEVO: **＋ → Secuencia de comandos**, nombrarlo igual
-   (ej. `Transferencias`) y pegar el contenido. Guardar.
+2. **＋ → Secuencia de comandos**, nombrarlo `FinanzasV3` y pegar el contenido
+   del archivo (o Claude lo sube directo con clasp si ya diste acceso). Guardar.
 3. Seleccionar la función **`setupV3`** en la barra superior → **Ejecutar**.
    - Autorizar los permisos nuevos (acceso al Control Maestro).
    - En los logs aparece el **TOKEN de la API** — copiarlo.
