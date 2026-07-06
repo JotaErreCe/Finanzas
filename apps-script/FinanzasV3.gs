@@ -867,6 +867,7 @@ function setupV3() {
   generarPagosDelMes();
   actualizarMetodosPago();
   const token = obtenerOCrearToken();
+  guardarTokenEnHoja(token);
   crearTriggersV3();
 
   console.log("========================================");
@@ -911,6 +912,23 @@ function obtenerOCrearToken() {
 /** Muestra el token en los logs sin regenerarlo (por si lo perdiste). */
 function mostrarToken() {
   console.log("TOKEN: " + (PropertiesService.getScriptProperties().getProperty("API_TOKEN") || "(no generado aún — ejecuta setupV3)"));
+}
+
+/**
+ * Guarda el token en la hoja "API Config" del sheet de seguimiento, para
+ * poder configurar la app sin copiar nada a mano desde los logs.
+ */
+function guardarTokenEnHoja(token) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let hoja = ss.getSheetByName("API Config");
+  if (!hoja) hoja = ss.insertSheet("API Config");
+  hoja.getRange(1, 1, 3, 2).setValues([
+    ["Token", token],
+    ["URL Web App", hoja.getRange(2, 2).getValue() || ""],
+    ["Nota", "No borrar esta hoja: se usa para configurar la app del celular."]
+  ]);
+  hoja.getRange("A1:A3").setFontWeight("bold");
+  hoja.autoResizeColumns(1, 2);
 }
 
 function crearTriggersV3() {
