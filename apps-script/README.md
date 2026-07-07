@@ -1,45 +1,41 @@
 # Apps Script — Sistema de Finanzas Familiares v3
 
-## Qué hay aquí
+## Estructura
 
-| Archivo | Estado | Qué hace |
-|---|---|---|
-| `Code.gs` | **Ya está en tu proyecto** (copia de referencia, no hay que tocarlo) | v2: procesa correos de consumo de tarjeta, alertas, resumen semanal |
-| `FinanzasV3.gs` | **NUEVO — un solo archivo** | Todo lo v3: transferencias ACH, métodos de pago, fijos del Control Maestro, API web y `setupV3()` |
+- **`proyecto/`** — espejo del proyecto real de Apps Script (gestionado con
+  clasp; `clasp pull` / `clasp push` desde esa carpeta):
+  - `Código.js` — v2 original: correos de consumo de tarjeta, alertas,
+    resumen semanal. **No se modifica.**
+  - `FinanzasV3.js` — extensiones v3 en un solo archivo: transferencias ACH
+    (excluye cuentas propias), hoja "Métodos de Pago", fijos del Control
+    Maestro ("Fijos" + "Control Pagos"), API web para la app y `setupV3()`.
+  - `appsscript.json` — manifest (zona horaria GT + config de Web App).
+- `Code.gs` / `FinanzasV3.gs` — copias de referencia legibles en la raíz
+  (misma fuente que `proyecto/`).
 
-**El código v2 no se toca.** `FinanzasV3.gs` es un único archivo independiente
-que convive en el mismo proyecto (Apps Script comparte funciones entre
-archivos). `procesarCorreos` y sus triggers siguen igual.
+## Activación (ya casi todo hecho)
 
-## Instalación (una sola vez, ~5 minutos)
+1. ~~Subir el código al proyecto~~ ✓ (con clasp)
+2. ~~Desplegar como Aplicación web~~ ✓ (con clasp)
+3. **Ejecutar `setupV3` una vez desde el editor** (esto lo hace el dueño de
+   la cuenta): abrir `FinanzasV3.gs`, elegir `setupV3` en el desplegable de
+   funciones, Ejecutar, y autorizar los permisos. Crea:
+   - Hojas "Cuentas Propias", "Transferencias Internas", "Métodos de Pago"
+     y "API Config" (con el token) en el sheet de seguimiento.
+   - Hojas "Fijos" y "Control Pagos" en el Control Maestro.
+   - Triggers: transferencias c/15 min, métodos c/hora, checklist mensual.
+4. Configurar la app (⚙ Ajustes → URL + token, o el enlace `#cfg=` que
+   genera Claude leyendo la hoja "API Config").
 
-1. Abrir el sheet de seguimiento → **Extensiones → Apps Script**.
-2. **＋ → Secuencia de comandos**, nombrarlo `FinanzasV3` y pegar el contenido
-   del archivo (o Claude lo sube directo con clasp si ya diste acceso). Guardar.
-3. Seleccionar la función **`setupV3`** en la barra superior → **Ejecutar**.
-   - Autorizar los permisos nuevos (acceso al Control Maestro).
-   - En los logs aparece el **TOKEN de la API** — copiarlo.
-4. **Implementar → Nueva implementación → Aplicación web**:
-   - Ejecutar como: **Yo**
-   - Quién tiene acceso: **Cualquier usuario**
-   - Copiar la **URL** que termina en `/exec`.
-5. Abrir la app → ⚙ Ajustes → pegar URL y token. Listo (tu esposa hace lo
-   mismo una vez en su teléfono, o abre el enlace de configuración que
-   puedes compartirle desde Ajustes).
+## Después de activar
 
-## Después de instalar
+- Revisar **"Cuentas Propias"**: agregar cuentas BI/Banrural/de la esposa.
+  Las transferencias hacia esas cuentas NO cuentan como gasto.
+- Revisar **"Fijos"** en el Control Maestro (montos, activos, día de pago).
+- Las hojas viejas del Control Maestro quedan intactas.
 
-- **Revisar la hoja "Cuentas Propias"** en el sheet de seguimiento y agregar
-  los números de cuenta que faltan (BI, Banrural, cuentas de tu esposa).
-  Toda transferencia hacia esas cuentas se registra en "Transferencias
-  Internas" y **no cuenta como gasto**.
-- **Revisar la hoja "Fijos"** en el Control Maestro: montos, cuáles siguen
-  activos, y opcionalmente el día de pago.
-- Las hojas viejas del Control Maestro (Pagos 2026, Control mensual…) quedan
-  intactas; cuando confíes en el flujo nuevo puedes archivarlas.
-
-## Funciones de prueba
+## Funciones útiles
 
 - `probarParserTransferencia()` — valida el parser con los correos reales.
-- `probarSistema()` / `probarParserGyT()` — las de siempre de v2.
-- `mostrarToken()` — reimprime el token si lo perdiste.
+- `mostrarToken()` — reimprime el token en los logs.
+- `generarPagosDelMes()` — regenera el checklist del mes a mano.
