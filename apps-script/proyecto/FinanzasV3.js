@@ -945,3 +945,53 @@ function crearTriggersV3() {
     console.log("Trigger creado: " + fn);
   }
 }
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║ Diagnóstico (temporal)                                          
+// ╚══════════════════════════════════════════════════════════════╝
+
+/**
+ * Diagnóstico de estado real de setupV3, para ejecutar vía `clasp run`
+ * y depurar sin adivinar. No expone el token, solo si existe o no.
+ * Se puede borrar una vez resuelto el problema.
+ */
+function diagnosticoV3() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let cm, errorCM = null;
+  try {
+    cm = SpreadsheetApp.openById(CONFIG_CM.SPREADSHEET_ID);
+  } catch (e) {
+    errorCM = e.message;
+  }
+
+  const resultado = {
+    hojasTracking: ss.getSheets().map(s => s.getName()),
+    errorAbrirControlMaestro: errorCM,
+    hojasMaestro: cm ? cm.getSheets().map(s => s.getName()) : null,
+    tokenExiste: !!PropertiesService.getScriptProperties().getProperty("API_TOKEN"),
+    triggers: ScriptApp.getProjectTriggers().map(t => t.getHandlerFunction())
+  };
+
+  if (cm) {
+    const rubrosSheet = cm.getSheetByName(CONFIG_CM.HOJA_RUBROS);
+    if (rubrosSheet) {
+      const datos = rubrosSheet.getDataRange().getValues();
+      const fijos = datos.filter(r => {
+        const id = parseInt(r[0]);
+        if (isNaN(id)) return false;
+        return (r[2] || "").toString().trim().toLowerCase() === "fijo";
+      });
+      resultado.rubros = {
+        totalFilas: datos.length,
+        fijosDetectados: fijos.length,
+        encabezado: datos[0],
+        fila1: datos[1] || null
+      };
+    } else {
+      resultado.rubros = "Hoja 'Rubros' no encontrada en Control Maestro";
+    }
+  }
+
+  console.log(JSON.stringify(resultado, null, 2));
+  return resultado;
+}
